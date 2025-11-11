@@ -1407,6 +1407,19 @@
             font-size: 0.9rem;
         }
 
+        /* ===== TYPING INDICATOR ===== */
+        .message.typing {
+            font-style: italic;
+            color: var(--gray);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
         /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 992px) {
             .idoc-container {
@@ -2085,155 +2098,119 @@
     </div>
 
     <script>
-        // ========== INISIALISASI DAN VARIABEL GLOBAL ==========
+        // ========== AI CHAT DENGAN DEEPSEEK API ==========
         
+        // ⚠️ GANTI API KEY DI BAWAH INI DENGAN API KEY LU!
+        const DEEPSEEK_API_KEY = "sk-44f2cb3da4014e3482beace1ce8029f9";
+        const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
+
         // DOM Elements
-        const hamburgerMenu = document.getElementById('hamburgerMenu');
-        const navLinks = document.getElementById('navLinks');
-        const navOverlay = document.getElementById('navOverlay');
         const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const sendMessage = document.getElementById('sendMessage');
         const exampleQuestions = document.querySelectorAll('.example-question');
-        const checkDevBtn = document.getElementById('checkDev');
-        const devResult = document.getElementById('devResult');
-        const milestoneList = document.getElementById('milestoneList');
-        const applyFiltersBtn = document.getElementById('applyFilters');
-        const useLocationBtn = document.getElementById('useLocation');
-        
-        // Calculator Popup Elements
-        const calculatorPopup = document.getElementById('calculatorPopup');
-        const popupContent = document.getElementById('popupContent');
-        const popupTitle = document.getElementById('popupTitle');
-        const calculatorForm = document.getElementById('calculatorForm');
-        const calculatorResult = document.getElementById('calculatorResult');
-        const popupClose = document.getElementById('popupClose');
-        const resetCalculator = document.getElementById('resetCalculator');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const calculatorButtons = document.querySelectorAll('.calculator-btn');
+
+        // Function untuk kirim pesan
+        async function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (message === '') return;
+            
+            // Tampilkan pesan user
+            addMessage(message, 'user');
+            chatInput.value = '';
+            
+            // Tampilkan "sedang mengetik"
+            showTypingIndicator();
+            
+            try {
+                // PANGGIL API DEEPSEEK
+                const response = await fetch(DEEPSEEK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "deepseek-chat",
+                        messages: [
+                            {
+                                role: "system",
+                                content: `Kamu adalah i-Doc, asisten kesehatan Indonesia yang ramah dan helpful. 
+                                Peraturan:
+                                - Jawab dengan bahasa santai seperti teman
+                                - Kasih saran kesehatan praktis
+                                - Ingatkan konsultasi dokter jika gejala serius
+                                - Bisa ngobrol topik umum dengan natural
+                                - Jangan terlalu formal
+                                - Maksimal 200 kata per respons`
+                            },
+                            {
+                                role: "user", 
+                                content: message
+                            }
+                        ],
+                        max_tokens: 500,
+                        temperature: 0.7
+                    })
+                });
+                
+                const data = await response.json();
+                removeTypingIndicator();
+                
+                // Tampilkan response AI
+                const aiResponse = data.choices[0].message.content;
+                addMessage(aiResponse, 'bot');
+                
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage("Maaf, lagi error nih. Coba lagi ya!", 'bot');
+                console.error('Error:', error);
+            }
+        }
+
+        // Function bantuan
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = text;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.classList.add('message', 'bot', 'typing');
+            typingDiv.innerHTML = '<i class="fas fa-ellipsis-h"></i> i-Doc sedang mengetik...';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) typingIndicator.remove();
+        }
+
+        // Event listener untuk chat
+        sendMessage.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        // Event listener untuk contoh pertanyaan
+        exampleQuestions.forEach(button => {
+            button.addEventListener('click', function() {
+                chatInput.value = this.textContent;
+                sendChatMessage();
+            });
+        });
+
+        // ========== FUNGSI LAINNYA (DARK MODE, NAVIGATION, DLL) ==========
         
         // Dark Mode Toggle
         const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
-
-        // Data untuk simulasi
-        const healthArticles = {
-            'flu': {
-                title: 'Influenza (Flu)',
-                content: 'Influenza adalah infeksi virus yang menyerang sistem pernapasan. Gejala umum termasuk demam, batuk, sakit tenggorokan, pilek, dan nyeri otot. Istirahat yang cukup, minum banyak cairan, dan obat pereda gejala dapat membantu pemulihan.'
-            },
-            'demam': {
-                title: 'Cara Menurunkan Demam',
-                content: 'Untuk menurunkan demam: 1) Minum banyak cairan, 2) Kompres dahi dengan air hangat, 3) Gunakan pakaian yang nyaman dan tidak terlalu tebal, 4) Konsumsi obat penurun demam seperti parasetamol sesuai dosis. Jika demam tinggi (>39°C) atau berlangsung lebih dari 3 hari, segera konsultasi dokter.'
-            },
-            'hipertensi': {
-                title: 'Makanan untuk Hipertensi',
-                content: 'Makanan yang baik untuk penderita hipertensi: 1) Sayuran hijau (bayam, kale), 2) Buah beri, 3) Pisang, 4) Oatmeal, 5) Ikan salmon, 6) Bawang putih. Hindari makanan tinggi garam, makanan olahan, dan alkohol.'
-            }
-        };
-
-        const developmentMilestones = {
-            '0-3': [
-                "Dapat mengangkat kepala saat tengkurap",
-                "Mengikuti objek dengan mata",
-                "Tersenyum sebagai respons"
-            ],
-            '4-6': [
-                "Dapat berguling dari punggung ke perut",
-                "Menggapai dan memegang benda",
-                "Mengoceh dan tertawa"
-            ],
-            '7-9': [
-                "Dapat duduk tanpa bantuan",
-                "Merangkak atau bergeser",
-                "Mengucapkan 'mama' atau 'papa'"
-            ],
-            '10-12': [
-                "Dapat berdiri dengan berpegangan",
-                "Menggunakan jari untuk mengambil benda kecil",
-                "Mengerti perintah sederhana"
-            ],
-            '13-18': [
-                "Berjalan tanpa bantuan",
-                "Dapat mengatakan beberapa kata",
-                "Meniru kegiatan orang dewasa"
-            ],
-            '19-24': [
-                "Dapat berlari dan menendang bola",
-                "Menggabungkan 2-3 kata",
-                "Mulai menunjukkan kemandirian"
-            ],
-            '25-36': [
-                "Dapat naik turun tangga",
-                "Menggunakan kalimat 3-4 kata",
-                "Mulai bermain dengan anak lain"
-            ],
-            '37-72': [
-                "Dapat melompat dengan satu kaki",
-                "Mengerti konsep waktu (pagi, siang, malam)",
-                "Dapat menggambar bentuk sederhana"
-            ]
-        };
-
-        // ========== FUNGSI UTAMA ==========
-
-        // Inisialisasi aplikasi
-        function initApp() {
-            setupEventListeners();
-            setupDarkMode();
-            setupScrollAnimations();
-        }
-
-        // Setup semua event listener
-        function setupEventListeners() {
-            // Navigation
-            hamburgerMenu.addEventListener('click', toggleMobileMenu);
-            navOverlay.addEventListener('click', closeMobileMenu);
-            document.querySelectorAll('.nav-links a').forEach(link => {
-                link.addEventListener('click', closeMobileMenu);
-            });
-
-            // i-Doc Chat
-            sendMessage.addEventListener('click', sendChatMessage);
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') sendChatMessage();
-            });
-            exampleQuestions.forEach(question => {
-                question.addEventListener('click', () => {
-                    chatInput.value = question.textContent;
-                    sendChatMessage();
-                });
-            });
-
-            // Child Development
-            checkDevBtn.addEventListener('click', checkChildDevelopment);
-
-            // Emergency Calls
-            document.querySelectorAll('.emergency-btn').forEach(button => {
-                button.addEventListener('click', handleEmergencyCall);
-            });
-
-            // Healthcare Finder
-            applyFiltersBtn.addEventListener('click', applyHealthFilters);
-            useLocationBtn.addEventListener('click', useCurrentLocation);
-
-            // Calculators
-            calculatorButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const calculatorType = button.getAttribute('data-calculator');
-                    openCalculatorPopup(calculatorType);
-                });
-            });
-            popupClose.addEventListener('click', closeCalculatorPopup);
-            resetCalculator.addEventListener('click', resetCalculatorForm);
-            calculateBtn.addEventListener('click', calculateResult);
-
-            // Theme Toggle
-            themeToggle.addEventListener('change', toggleDarkMode);
-        }
-
-        // ========== DARK MODE ==========
 
         function setupDarkMode() {
             const currentTheme = localStorage.getItem('theme') || 'light';
@@ -2253,7 +2230,10 @@
             }
         }
 
-        // ========== NAVIGASI MOBILE ==========
+        // Navigation Mobile
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const navLinks = document.getElementById('navLinks');
+        const navOverlay = document.getElementById('navOverlay');
 
         function toggleMobileMenu() {
             hamburgerMenu.classList.toggle('active');
@@ -2267,9 +2247,21 @@
             navOverlay.classList.remove('active');
         }
 
-        // ========== ANIMASI SCROLL ==========
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDarkMode();
+            
+            // Navigation
+            hamburgerMenu.addEventListener('click', toggleMobileMenu);
+            navOverlay.addEventListener('click', closeMobileMenu);
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
+            });
 
-        function setupScrollAnimations() {
+            // Dark Mode
+            themeToggle.addEventListener('change', toggleDarkMode);
+
+            // Scroll animations
             const observerOptions = {
                 root: null,
                 rootMargin: '0px',
@@ -2279,501 +2271,18 @@
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
+                        entry.target.style.opacity = "1";
+                        entry.target.style.transform = "translateY(0)";
                     }
                 });
             }, observerOptions);
 
             document.querySelectorAll('.card').forEach(card => {
+                card.style.opacity = "0";
+                card.style.transform = "translateY(20px)";
+                card.style.transition = "opacity 0.6s ease, transform 0.6s ease";
                 observer.observe(card);
             });
-        }
-
-        // ========== I-DOC CHAT AI ==========
-
-        function sendChatMessage() {
-            const message = chatInput.value.trim();
-            if (message === '') return;
-            
-            // Add user message
-            addMessage(message, 'user');
-            chatInput.value = '';
-            
-            // Simulate AI response after a delay
-            setTimeout(() => {
-                const response = generateAIResponse(message);
-                addMessage(response, 'bot');
-            }, 1000);
-        }
-
-        function addMessage(text, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', sender);
-            messageDiv.textContent = text;
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function generateAIResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            
-            // Check for specific keywords
-            if (lowerMessage.includes('flu') || lowerMessage.includes('influenza')) {
-                return healthArticles.flu.content;
-            } else if (lowerMessage.includes('demam')) {
-                return healthArticles.demam.content;
-            } else if (lowerMessage.includes('hipertensi') || lowerMessage.includes('tekanan darah')) {
-                return healthArticles.hipertensi.content;
-            } else if (lowerMessage.includes('gejala') || lowerMessage.includes('sakit')) {
-                return "Berdasarkan gejala yang Anda sebutkan, saya sarankan untuk beristirahat yang cukup dan minum air putih. Jika gejala berlanjut, konsultasikan dengan dokter untuk diagnosis yang tepat.";
-            } else {
-                const responses = [
-                    "Saya memahami keluhan Anda. Untuk informasi yang lebih akurat, saya sarankan untuk berkonsultasi dengan tenaga medis profesional.",
-                    "Terima kasih telah berkonsultasi dengan saya. Jika gejala berlanjut atau memburuk, segera hubungi dokter.",
-                    "Saya adalah asisten AI dan tidak dapat menggantikan diagnosis dokter. Konsultasikan dengan tenaga medis untuk penanganan yang tepat.",
-                    "Penting untuk tidak mengabaikan gejala tersebut. Saya sarankan untuk memeriksakan diri ke fasilitas kesehatan terdekat."
-                ];
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-        }
-
-        // ========== PERKEMBANGAN ANAK ==========
-
-        function checkChildDevelopment() {
-            const age = parseInt(document.getElementById('childAge').value);
-            const gender = document.getElementById('childGender').value;
-            
-            if (isNaN(age) || age < 0 || age > 72) {
-                alert('Masukkan usia anak yang valid (0-72 bulan)');
-                return;
-            }
-            
-            // Get milestones based on age
-            const milestones = getMilestones(age);
-            
-            // Clear previous results
-            milestoneList.innerHTML = '';
-            
-            // Add milestones to list
-            milestones.forEach(milestone => {
-                const li = document.createElement('li');
-                li.innerHTML = `<i class="fas fa-check-circle"></i> ${milestone}`;
-                milestoneList.appendChild(li);
-            });
-            
-            // Show result
-            devResult.classList.add('active');
-        }
-
-        function getMilestones(age) {
-            if (age <= 3) return developmentMilestones['0-3'];
-            if (age <= 6) return developmentMilestones['4-6'];
-            if (age <= 9) return developmentMilestones['7-9'];
-            if (age <= 12) return developmentMilestones['10-12'];
-            if (age <= 18) return developmentMilestones['13-18'];
-            if (age <= 24) return developmentMilestones['19-24'];
-            if (age <= 36) return developmentMilestones['25-36'];
-            return developmentMilestones['37-72'];
-        }
-
-        // ========== DARURAT MEDIS ==========
-
-        function handleEmergencyCall() {
-            const card = this.closest('.emergency-card');
-            const number = card.querySelector('.emergency-number').textContent;
-            const service = card.querySelector('h3').textContent;
-            
-            if(confirm(`Apakah Anda yakin ingin menghubungi ${service} di nomor ${number}?`)) {
-                // Simulasi panggilan - di aplikasi nyata akan membuka dialer
-                alert(`Menghubungi ${service}...\n\nNomor: ${number}\n\n*Ini hanya simulasi. Di aplikasi nyata, panggilan akan langsung dilakukan.*`);
-                
-                // Log emergency call
-                logEmergencyCall(service, number);
-            }
-        }
-
-        function logEmergencyCall(service, number) {
-            const emergencyLog = JSON.parse(localStorage.getItem('emergencyLog') || '[]');
-            emergencyLog.push({
-                service: service,
-                number: number,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('emergencyLog', JSON.stringify(emergencyLog));
-        }
-
-        // ========== PENCARIAN FASILITAS KESEHATAN ==========
-
-        function applyHealthFilters() {
-            // Simulasi penerapan filter
-            const selectedFacilities = Array.from(document.querySelectorAll('.filters input[type="checkbox"]:checked'))
-                .map(checkbox => checkbox.parentElement.textContent.trim());
-            
-            const selectedDistance = document.querySelector('.filters input[type="radio"]:checked').parentElement.textContent.trim();
-            
-            alert(`Filter diterapkan:\n- Fasilitas: ${selectedFacilities.join(', ')}\n- Jarak: ${selectedDistance}\n\n*Fitur pencarian nyata akan menampilkan hasil di peta*`);
-        }
-
-        function useCurrentLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        alert(`Lokasi Anda telah terdeteksi:\nLatitude: ${lat.toFixed(6)}\nLongitude: ${lng.toFixed(6)}\n\n*Di aplikasi nyata, peta akan menyesuaikan dengan lokasi Anda*`);
-                    },
-                    (error) => {
-                        alert('Tidak dapat mengakses lokasi Anda. Pastikan izin lokasi telah diaktifkan.');
-                        console.error('Error getting location:', error);
-                    }
-                );
-            } else {
-                alert('Browser Anda tidak mendukung geolocation.');
-            }
-        }
-
-        // ========== KALKULATOR KESEHATAN ==========
-
-        function openCalculatorPopup(type) {
-            // Set popup title based on calculator type
-            const titles = {
-                'bmi': 'Kalkulator BMI',
-                'heart': 'Kalkulator Denyut Jantung',
-                'calorie': 'Kalkulator Kalori',
-                'water': 'Kalkulator Kebutuhan Cairan',
-                'calorie-burn': 'Kalkulator Pembakaran Kalori',
-                'pregnancy': 'Kalkulator Kehamilan'
-            };
-            
-            popupTitle.textContent = titles[type] || 'Kalkulator Kesehatan';
-            
-            // Set form based on calculator type
-            calculatorForm.innerHTML = getCalculatorForm(type);
-            
-            // Reset result
-            calculatorResult.classList.remove('active');
-            calculatorResult.innerHTML = '';
-            
-            // Store current calculator type
-            calculatorForm.setAttribute('data-calculator', type);
-            
-            // Show popup
-            calculatorPopup.classList.add('active');
-            popupContent.classList.add('active');
-            
-            // Prevent body scroll
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeCalculatorPopup() {
-            calculatorPopup.classList.remove('active');
-            popupContent.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        function resetCalculatorForm() {
-            calculatorForm.reset();
-            calculatorResult.classList.remove('active');
-            calculatorResult.innerHTML = '';
-        }
-
-        function calculateResult() {
-            const calculatorType = calculatorForm.getAttribute('data-calculator');
-            const result = calculate(calculatorType);
-            
-            if (result) {
-                calculatorResult.innerHTML = result;
-                calculatorResult.classList.add('active');
-            }
-        }
-
-        function getCalculatorForm(type) {
-            const forms = {
-                'bmi': `
-                    <div class="form-group">
-                        <label for="weight">Berat Badan (kg)</label>
-                        <input type="number" id="weight" placeholder="Masukkan berat badan" min="1" max="300" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="height">Tinggi Badan (cm)</label>
-                        <input type="number" id="height" placeholder="Masukkan tinggi badan" min="50" max="250" required>
-                    </div>
-                `,
-                'heart': `
-                    <div class="form-group">
-                        <label for="age">Usia (tahun)</label>
-                        <input type="number" id="age" placeholder="Masukkan usia" min="1" max="120" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="restingHeartRate">Denyut Jantung Istirahat (bpm)</label>
-                        <input type="number" id="restingHeartRate" placeholder="Masukkan denyut jantung istirahat" min="30" max="200" required>
-                    </div>
-                `,
-                'calorie': `
-                    <div class="form-group">
-                        <label for="gender">Jenis Kelamin</label>
-                        <select id="gender" required>
-                            <option value="">Pilih jenis kelamin</option>
-                            <option value="male">Laki-laki</option>
-                            <option value="female">Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="age">Usia (tahun)</label>
-                        <input type="number" id="age" placeholder="Masukkan usia" min="1" max="120" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weight">Berat Badan (kg)</label>
-                        <input type="number" id="weight" placeholder="Masukkan berat badan" min="1" max="300" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="height">Tinggi Badan (cm)</label>
-                        <input type="number" id="height" placeholder="Masukkan tinggi badan" min="50" max="250" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="activity">Tingkat Aktivitas</label>
-                        <select id="activity" required>
-                            <option value="">Pilih tingkat aktivitas</option>
-                            <option value="1.2">Sedentary (jarang olahraga)</option>
-                            <option value="1.375">Ringan (olahraga 1-3 hari/minggu)</option>
-                            <option value="1.55">Sedang (olahraga 3-5 hari/minggu)</option>
-                            <option value="1.725">Tinggi (olahraga 6-7 hari/minggu)</option>
-                            <option value="1.9">Sangat Tinggi (olahraga berat setiap hari)</option>
-                        </select>
-                    </div>
-                `,
-                'water': `
-                    <div class="form-group">
-                        <label for="weight">Berat Badan (kg)</label>
-                        <input type="number" id="weight" placeholder="Masukkan berat badan" min="1" max="300" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="activity">Tingkat Aktivitas</label>
-                        <select id="activity" required>
-                            <option value="">Pilih tingkat aktivitas</option>
-                            <option value="30">Sedentary (jarang olahraga)</option>
-                            <option value="35">Ringan (olahraga 1-3 hari/minggu)</option>
-                            <option value="40">Sedang (olahraga 3-5 hari/minggu)</option>
-                            <option value="45">Tinggi (olahraga 6-7 hari/minggu)</option>
-                        </select>
-                    </div>
-                `,
-                'calorie-burn': `
-                    <div class="form-group">
-                        <label for="activityType">Jenis Aktivitas</label>
-                        <select id="activityType" required>
-                            <option value="">Pilih jenis aktivitas</option>
-                            <option value="8">Berjalan (5 km/jam)</option>
-                            <option value="10">Berlari (8 km/jam)</option>
-                            <option value="7">Bersepeda (ringan)</option>
-                            <option value="12">Bersepeda (sedang)</option>
-                            <option value="5">Berenang (ringan)</option>
-                            <option value="8">Berenang (sedang)</option>
-                            <option value="3">Yoga</option>
-                            <option value="6">Aerobik</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="duration">Durasi (menit)</label>
-                        <input type="number" id="duration" placeholder="Masukkan durasi aktivitas" min="1" max="300" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weight">Berat Badan (kg)</label>
-                        <input type="number" id="weight" placeholder="Masukkan berat badan" min="1" max="300" required>
-                    </div>
-                `,
-                'pregnancy': `
-                    <div class="form-group">
-                        <label for="lastPeriod">Tanggal Hari Pertama Haid Terakhir</label>
-                        <input type="date" id="lastPeriod" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cycleLength">Panjang Siklus Haid (hari)</label>
-                        <input type="number" id="cycleLength" placeholder="Rata-rata 28 hari" min="21" max="35" value="28" required>
-                    </div>
-                `
-            };
-            
-            return forms[type] || '<p>Kalkulator tidak tersedia.</p>';
-        }
-
-        function calculate(type) {
-            switch(type) {
-                case 'bmi':
-                    return calculateBMI();
-                case 'heart':
-                    return calculateHeartRate();
-                case 'calorie':
-                    return calculateCalorie();
-                case 'water':
-                    return calculateWater();
-                case 'calorie-burn':
-                    return calculateCalorieBurn();
-                case 'pregnancy':
-                    return calculatePregnancy();
-                default:
-                    return '<p>Kalkulator tidak tersedia.</p>';
-            }
-        }
-
-        function calculateBMI() {
-            const weight = parseFloat(document.getElementById('weight').value);
-            const height = parseFloat(document.getElementById('height').value) / 100; // Convert to meters
-            
-            if (!weight || !height) {
-                alert('Harap isi semua field yang diperlukan');
-                return null;
-            }
-            
-            const bmi = weight / (height * height);
-            let category = '';
-            let categoryClass = '';
-            
-            if (bmi < 18.5) {
-                category = 'Underweight (Kekurangan berat badan)';
-                categoryClass = 'result-underweight';
-            } else if (bmi < 25) {
-                category = 'Normal (Berat badan ideal)';
-                categoryClass = 'result-normal';
-            } else if (bmi < 30) {
-                category = 'Overweight (Kelebihan berat badan)';
-                categoryClass = 'result-overweight';
-            } else {
-                category = 'Obese (Obesitas)';
-                categoryClass = 'result-obese';
-            }
-            
-            return `
-                <h4>Hasil Perhitungan BMI</h4>
-                <div class="result-value">${bmi.toFixed(1)}</div>
-                <div class="result-category ${categoryClass}">${category}</div>
-                <p style="margin-top: 15px;">BMI (Body Mass Index) adalah indikator sederhana dari korespondensi antara berat dan tinggi badan.</p>
-            `;
-        }
-
-        function calculateHeartRate() {
-            const age = parseInt(document.getElementById('age').value);
-            const restingHeartRate = parseInt(document.getElementById('restingHeartRate').value);
-            
-            if (!age || !restingHeartRate) {
-                alert('Harap isi semua field yang diperlukan');
-                return null;
-            }
-            
-            const maxHeartRate = 220 - age;
-            const targetHeartRateMin = Math.round((maxHeartRate - restingHeartRate) * 0.5 + restingHeartRate);
-            const targetHeartRateMax = Math.round((maxHeartRate - restingHeartRate) * 0.85 + restingHeartRate);
-            
-            return `
-                <h4>Hasil Perhitungan Denyut Jantung</h4>
-                <p><strong>Denyut Jantung Maksimal:</strong> ${maxHeartRate} bpm</p>
-                <p><strong>Zona Latihan Ideal:</strong> ${targetHeartRateMin} - ${targetHeartRateMax} bpm</p>
-                <p><strong>Denyut Jantung Istirahat:</strong> ${restingHeartRate} bpm</p>
-                <p style="margin-top: 15px;">Zona latihan ideal adalah 50-85% dari denyut jantung maksimal Anda.</p>
-            `;
-        }
-
-        function calculateCalorie() {
-            const gender = document.getElementById('gender').value;
-            const age = parseInt(document.getElementById('age').value);
-            const weight = parseFloat(document.getElementById('weight').value);
-            const height = parseFloat(document.getElementById('height').value);
-            const activity = parseFloat(document.getElementById('activity').value);
-            
-            if (!gender || !age || !weight || !height || !activity) {
-                alert('Harap isi semua field yang diperlukan');
-                return null;
-            }
-            
-            let bmr;
-            if (gender === 'male') {
-                bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-            } else {
-                bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-            }
-            
-            const tdee = Math.round(bmr * activity);
-            
-            return `
-                <h4>Hasil Perhitungan Kebutuhan Kalori</h4>
-                <p><strong>BMR (Basal Metabolic Rate):</strong> ${Math.round(bmr)} kalori/hari</p>
-                <p><strong>TDEE (Total Daily Energy Expenditure):</strong> ${tdee} kalori/hari</p>
-                <p style="margin-top: 15px;">BMR adalah jumlah kalori yang dibutuhkan tubuh untuk berfungsi saat istirahat. TDEE adalah total kalori yang dibakar dalam sehari termasuk aktivitas fisik.</p>
-            `;
-        }
-
-        function calculateWater() {
-            const weight = parseFloat(document.getElementById('weight').value);
-            const activity = parseFloat(document.getElementById('activity').value);
-            
-            if (!weight || !activity) {
-                alert('Harap isi semua field yang diperlukan');
-                return null;
-            }
-            
-            const waterNeeded = Math.round((weight * activity) / 1000 * 10) / 10;
-            
-            return `
-                <h4>Hasil Perhitungan Kebutuhan Cairan</h4>
-                <div class="result-value">${waterNeeded} L/hari</div>
-                <p style="margin-top: 15px;">Kebutuhan cairan dapat bervariasi tergantung kondisi cuaca, kesehatan, dan faktor lainnya. Pastikan untuk minum cukup air sepanjang hari.</p>
-            `;
-        }
-
-        function calculateCalorieBurn() {
-            const activityType = parseFloat(document.getElementById('activityType').value);
-            const duration = parseInt(document.getElementById('duration').value);
-            const weight = parseFloat(document.getElementById('weight').value);
-            
-            if (!activityType || !duration || !weight) {
-                alert('Harap isi semua field yang diperlukan');
-                return null;
-            }
-            
-            const caloriesBurned = Math.round(activityType * weight * duration / 60);
-            
-            return `
-                <h4>Hasil Perhitungan Pembakaran Kalori</h4>
-                <div class="result-value">${caloriesBurned} kalori</div>
-                <p style="margin-top: 15px;">Perhitungan ini adalah estimasi. Pembakaran kalori aktual dapat bervariasi tergantung intensitas dan faktor individu lainnya.</p>
-            `;
-        }
-
-        function calculatePregnancy() {
-            const lastPeriod = new Date(document.getElementById('lastPeriod').value);
-            const cycleLength = parseInt(document.getElementById('cycleLength').value);
-            
-            if (!lastPeriod || isNaN(lastPeriod.getTime()) || !cycleLength) {
-                alert('Harap isi semua field yang diperlukan');
-                return null;
-            }
-            
-            // Calculate due date (280 days from last period)
-            const dueDate = new Date(lastPeriod);
-            dueDate.setDate(dueDate.getDate() + 280);
-            
-            // Calculate current week of pregnancy
-            const today = new Date();
-            const diffTime = Math.abs(today - lastPeriod);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            const weeksPregnant = Math.floor(diffDays / 7);
-            const daysPregnant = diffDays % 7;
-            
-            return `
-                <h4>Hasil Perhitungan Kehamilan</h4>
-                <p><strong>Usia Kehamilan:</strong> ${weeksPregnant} minggu ${daysPregnant} hari</p>
-                <p><strong>Perkiraan Tanggal Persalinan:</strong> ${dueDate.toLocaleDateString('id-ID')}</p>
-                <p><strong>Trimester:</strong> ${weeksPregnant < 13 ? 'Pertama' : weeksPregnant < 27 ? 'Kedua' : 'Ketiga'}</p>
-                <p style="margin-top: 15px;">Perhitungan ini berdasarkan tanggal haid terakhir. Konsultasikan dengan dokter untuk informasi yang lebih akurat.</p>
-            `;
-        }
-
-        // ========== INISIALISASI APLIKASI ==========
-
-        // Jalankan aplikasi ketika DOM siap
-        document.addEventListener('DOMContentLoaded', function() {
-            initApp();
         });
 
     </script>
