@@ -2098,11 +2098,8 @@
     </div>
 
     <script>
-        // ========== AI CHAT DENGAN DEEPSEEK API ==========
-        
-        // ⚠️ GANTI API KEY DI BAWAH INI DENGAN API KEY LU!
-        const DEEPSEEK_API_KEY = "sk-44f2cb3da4014e3482beace1ce8029f9";
-        const DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
+        // ========== AI CHAT DENGAN GOOGLE APPS SCRIPT ==========
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz9X5UPcQPsorOyelI0f4o0LEuHaQ9BsmasFvawGAyyu_CXzsOatU--Pkio7J7cG626/exec";
 
         // DOM Elements
         const chatMessages = document.getElementById('chatMessages');
@@ -2123,34 +2120,26 @@
             showTypingIndicator();
             
             try {
-                // PANGGIL API DEEPSEEK
-                const response = await fetch(DEEPSEEK_URL, {
+                // PANGGIL GOOGLE APPS SCRIPT
+                const response = await fetch(GAS_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
                     },
                     body: JSON.stringify({
-                        model: "deepseek-chat",
                         messages: [
                             {
                                 role: "system",
-                                content: `Kamu adalah i-Doc, asisten kesehatan Indonesia yang ramah dan helpful. 
-                                Peraturan:
-                                - Jawab dengan bahasa santai seperti teman
-                                - Kasih saran kesehatan praktis
-                                - Ingatkan konsultasi dokter jika gejala serius
-                                - Bisa ngobrol topik umum dengan natural
-                                - Jangan terlalu formal
-                                - Maksimal 200 kata per respons`
+                                content: `Kamu adalah i-Doc, asisten kesehatan AI yang ramah dan membantu. 
+                                Jawablah pertanyaan kesehatan dengan santai namun informatif.
+                                Berikan saran praktis dan ingatkan untuk konsultasi dokter jika gejala serius.
+                                Gunakan bahasa Indonesia yang mudah dipahami.`
                             },
                             {
                                 role: "user", 
                                 content: message
                             }
-                        ],
-                        max_tokens: 500,
-                        temperature: 0.7
+                        ]
                     })
                 });
                 
@@ -2158,12 +2147,16 @@
                 removeTypingIndicator();
                 
                 // Tampilkan response AI
-                const aiResponse = data.choices[0].message.content;
-                addMessage(aiResponse, 'bot');
+                if (data.choices && data.choices[0]) {
+                    const aiResponse = data.choices[0].message.content;
+                    addMessage(aiResponse, 'bot');
+                } else {
+                    addMessage("Maaf, respons tidak valid dari server.", 'bot');
+                }
                 
             } catch (error) {
                 removeTypingIndicator();
-                addMessage("Maaf, lagi error nih. Coba lagi ya!", 'bot');
+                addMessage("Maaf, sedang ada gangguan koneksi. Coba lagi ya!", 'bot');
                 console.error('Error:', error);
             }
         }
@@ -2206,8 +2199,7 @@
             });
         });
 
-        // ========== FUNGSI LAINNYA (DARK MODE, NAVIGATION, DLL) ==========
-        
+        // ========== FUNGSI LAINNYA ==========
         // Dark Mode Toggle
         const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
@@ -2289,4 +2281,3 @@
     
 </body>
 </html>
-
