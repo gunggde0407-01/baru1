@@ -6,6 +6,7 @@
     <title>Asistenku - Platform Kesehatan Digital Indonesia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* ===== VARIABLES & RESET ===== */
         :root {
@@ -1500,6 +1501,40 @@
                 padding: 20px;
             }
         }
+
+        /* Styling untuk response markdown */
+        .message.bot h1, .message.bot h2, .message.bot h3 {
+            color: var(--text-color);
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .message.bot strong {
+            color: var(--primary);
+        }
+        
+        .message.bot ul, .message.bot ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .message.bot li {
+            margin-bottom: 5px;
+        }
+        
+        .message.bot code {
+            background: var(--light-bg);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        .message.bot blockquote {
+            border-left: 3px solid var(--primary);
+            padding-left: 10px;
+            margin: 10px 0;
+            color: var(--gray);
+        }
     </style>
 </head>
 <body>
@@ -1704,7 +1739,7 @@
                     </div>
                     
                     <div class="chat-input">
-                        <input type="text" id="chatInput" placeholder="Tanyakan gejala atau keluhan kesehatan...">
+                        <input type="text" id="userInput" placeholder="Tanyakan gejala atau keluhan kesehatan...">
                         <button class="btn btn-primary" id="sendMessage">
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -2098,74 +2133,83 @@
     </div>
 
     <script>
-        // ========== AI CHAT DENGAN GOOGLE APPS SCRIPT ==========
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbz9X5UPcQPsorOyelI0f4o0LEuHaQ9BsmasFvawGAyyu_CXzsOatU--Pkio7J7cG626/exec";
+        // ========== AI CHAT DENGAN OPENROUTER API ==========
 
         // DOM Elements
         const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
-        const sendMessage = document.getElementById('sendMessage');
+        const userInput = document.getElementById('userInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
         const exampleQuestions = document.querySelectorAll('.example-question');
 
         // Function untuk kirim pesan
-        async function sendChatMessage() {
-            const message = chatInput.value.trim();
-            if (message === '') return;
+        async function sendMessage() {
+            const input = userInput.value.trim();
+            if (input === '') return;
             
             // Tampilkan pesan user
-            addMessage(message, 'user');
-            chatInput.value = '';
+            addMessage(input, 'user');
+            userInput.value = '';
             
             // Tampilkan "sedang mengetik"
             showTypingIndicator();
             
             try {
-                // PANGGIL GOOGLE APPS SCRIPT
-                const response = await fetch(GAS_URL, {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
+                        'Authorization': 'Bearer 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',
+                        'HTTP-Referer': 'https://asistenku-health.com',
+                        'X-Title': 'Asistenku Health',
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        model: 'deepseek/deepseek-r1:free',
                         messages: [
                             {
                                 role: "system",
-                                content: `Kamu adalah i-Doc, asisten kesehatan AI yang ramah dan membantu. 
-                                Jawablah pertanyaan kesehatan dengan santai namun informatif.
-                                Berikan saran praktis dan ingatkan untuk konsultasi dokter jika gejala serius.
-                                Gunakan bahasa Indonesia yang mudah dipahami.`
+                                content: `Kamu adalah i-Doc, asisten kesehatan Indonesia yang ramah dan helpful. 
+                                Peraturan:
+                                - Jawab dengan bahasa Indonesia yang santai seperti teman
+                                - Berikan saran kesehatan praktis dan mudah dipahami
+                                - Ingatkan untuk konsultasi dokter jika gejala serius
+                                - Fokus pada informasi kesehatan yang akurat
+                                - Berikan tips pencegahan penyakit
+                                - Maksimal 300 kata per respons`
                             },
                             {
                                 role: "user", 
-                                content: message
+                                content: input
                             }
-                        ]
-                    })
+                        ],
+                    }),
                 });
                 
                 const data = await response.json();
+                console.log(data);
                 removeTypingIndicator();
                 
                 // Tampilkan response AI
-                if (data.choices && data.choices[0]) {
-                    const aiResponse = data.choices[0].message.content;
-                    addMessage(aiResponse, 'bot');
-                } else {
-                    addMessage("Maaf, respons tidak valid dari server.", 'bot');
-                }
+                const aiResponse = data.choices?.[0]?.message?.content || 'Maaf, saya tidak bisa memberikan respons saat ini. Silakan coba lagi.';
+                const formattedResponse = marked.parse(aiResponse);
+                addMessage(formattedResponse, 'bot', true);
                 
             } catch (error) {
                 removeTypingIndicator();
-                addMessage("Maaf, sedang ada gangguan koneksi. Coba lagi ya!", 'bot');
+                addMessage("Maaf, terjadi error. Silakan coba lagi nanti.", 'bot');
                 console.error('Error:', error);
             }
         }
 
         // Function bantuan
-        function addMessage(text, sender) {
+        function addMessage(text, sender, isHTML = false) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
-            messageDiv.textContent = text;
+            
+            if (isHTML) {
+                messageDiv.innerHTML = text;
+            } else {
+                messageDiv.textContent = text;
+            }
             
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -2186,20 +2230,21 @@
         }
 
         // Event listener untuk chat
-        sendMessage.addEventListener('click', sendChatMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendChatMessage();
+        sendMessageBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
 
         // Event listener untuk contoh pertanyaan
         exampleQuestions.forEach(button => {
             button.addEventListener('click', function() {
-                chatInput.value = this.textContent;
-                sendChatMessage();
+                userInput.value = this.textContent;
+                sendMessage();
             });
         });
 
-        // ========== FUNGSI LAINNYA ==========
+        // ========== FUNGSI LAINNYA (DARK MODE, NAVIGATION, DLL) ==========
+        
         // Dark Mode Toggle
         const themeToggle = document.getElementById('themeToggle');
         const body = document.body;
@@ -2276,7 +2321,6 @@
                 observer.observe(card);
             });
         });
-
     </script>
     
 </body>
