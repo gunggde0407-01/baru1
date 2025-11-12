@@ -6,7 +6,6 @@
     <title>Asistenku - Platform Kesehatan Digital Indonesia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* ===== VARIABLES & RESET ===== */
         :root {
@@ -910,14 +909,17 @@
             align-items: center;
         }
 
+        /* Gaya untuk widget Denser AI */
         .idoc-chat {
             background-color: var(--light-bg);
             border-radius: var(--radius);
             padding: 20px;
-            height: 400px;
+            height: 500px;
             display: flex;
             flex-direction: column;
             box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
         }
 
         .chat-header {
@@ -940,51 +942,13 @@
             margin-right: 10px;
         }
 
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-bottom: 15px;
-        }
-
-        .message {
-            padding: 10px 15px;
-            border-radius: 18px;
-            margin-bottom: 10px;
-            max-width: 80%;
-        }
-
-        .message.user {
-            background: var(--gradient);
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.bot {
-            background-color: var(--light-gray);
-            color: var(--text-color);
-            border-bottom-left-radius: 5px;
-        }
-
-        .chat-input {
-            display: flex;
-        }
-
-        .chat-input input {
-            flex-grow: 1;
-            padding: 12px 15px;
-            border: 1px solid var(--input-border);
-            border-radius: 24px;
-            margin-right: 10px;
-            transition: all 0.3s ease;
-            background-color: var(--input-bg);
-            color: var(--text-color);
-        }
-
-        .chat-input input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        /* Gaya untuk iframe Denser AI */
+        .denser-chat-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: var(--radius);
+            background-color: var(--card-bg);
         }
 
         .idoc-features {
@@ -1469,6 +1433,10 @@
             .dev-form {
                 grid-template-columns: 1fr;
             }
+            
+            .idoc-features {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 576px) {
@@ -1500,40 +1468,6 @@
             .dev-calculator {
                 padding: 20px;
             }
-        }
-
-        /* Styling untuk response markdown */
-        .message.bot h1, .message.bot h2, .message.bot h3 {
-            color: var(--text-color);
-            margin: 10px 0;
-            font-size: 1.1em;
-        }
-        
-        .message.bot strong {
-            color: var(--primary);
-        }
-        
-        .message.bot ul, .message.bot ol {
-            padding-left: 20px;
-            margin: 10px 0;
-        }
-        
-        .message.bot li {
-            margin-bottom: 5px;
-        }
-        
-        .message.bot code {
-            background: var(--light-bg);
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-        
-        .message.bot blockquote {
-            border-left: 3px solid var(--primary);
-            padding-left: 10px;
-            margin: 10px 0;
-            color: var(--gray);
         }
     </style>
 </head>
@@ -1732,18 +1666,11 @@
                         </div>
                     </div>
                     
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message bot">
-                            Halo! Saya i-Doc, asisten kesehatan AI Anda. Ada yang bisa saya bantu hari ini?
-                        </div>
-                    </div>
-                    
-                    <div class="chat-input">
-                        <input type="text" id="userInput" placeholder="Tanyakan gejala atau keluhan kesehatan...">
-                        <button class="btn btn-primary" id="sendMessage">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
+                    <!-- Widget Denser AI -->
+                    <iframe
+                        class="denser-chat-iframe"
+                        src="https://denser.ai/u/embed/chatbot_yaop8d5kqthdcg0cxkvh4">
+                    </iframe>
                 </div>
                 
                 <div>
@@ -2133,116 +2060,6 @@
     </div>
 
     <script>
-        // ========== AI CHAT DENGAN OPENROUTER API ==========
-
-        // DOM Elements
-        const chatMessages = document.getElementById('chatMessages');
-        const userInput = document.getElementById('userInput');
-        const sendMessageBtn = document.getElementById('sendMessage');
-        const exampleQuestions = document.querySelectorAll('.example-question');
-
-        // Function untuk kirim pesan
-        async function sendMessage() {
-            const input = userInput.value.trim();
-            if (input === '') return;
-            
-            // Tampilkan pesan user
-            addMessage(input, 'user');
-            userInput.value = '';
-            
-            // Tampilkan "sedang mengetik"
-            showTypingIndicator();
-            
-            try {
-                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer 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',
-                        'HTTP-Referer': 'https://asistenku-health.com',
-                        'X-Title': 'Asistenku Health',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'deepseek/deepseek-r1:free',
-                        messages: [
-                            {
-                                role: "system",
-                                content: `Kamu adalah i-Doc, asisten kesehatan Indonesia yang ramah dan helpful. 
-                                Peraturan:
-                                - Jawab dengan bahasa Indonesia yang santai seperti teman
-                                - Berikan saran kesehatan praktis dan mudah dipahami
-                                - Ingatkan untuk konsultasi dokter jika gejala serius
-                                - Fokus pada informasi kesehatan yang akurat
-                                - Berikan tips pencegahan penyakit
-                                - Maksimal 300 kata per respons`
-                            },
-                            {
-                                role: "user", 
-                                content: input
-                            }
-                        ],
-                    }),
-                });
-                
-                const data = await response.json();
-                console.log(data);
-                removeTypingIndicator();
-                
-                // Tampilkan response AI
-                const aiResponse = data.choices?.[0]?.message?.content || 'Maaf, saya tidak bisa memberikan respons saat ini. Silakan coba lagi.';
-                const formattedResponse = marked.parse(aiResponse);
-                addMessage(formattedResponse, 'bot', true);
-                
-            } catch (error) {
-                removeTypingIndicator();
-                addMessage("Maaf, terjadi error. Silakan coba lagi nanti.", 'bot');
-                console.error('Error:', error);
-            }
-        }
-
-        // Function bantuan
-        function addMessage(text, sender, isHTML = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', sender);
-            
-            if (isHTML) {
-                messageDiv.innerHTML = text;
-            } else {
-                messageDiv.textContent = text;
-            }
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typing-indicator';
-            typingDiv.classList.add('message', 'bot', 'typing');
-            typingDiv.innerHTML = '<i class="fas fa-ellipsis-h"></i> i-Doc sedang mengetik...';
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function removeTypingIndicator() {
-            const typingIndicator = document.getElementById('typing-indicator');
-            if (typingIndicator) typingIndicator.remove();
-        }
-
-        // Event listener untuk chat
-        sendMessageBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
-        // Event listener untuk contoh pertanyaan
-        exampleQuestions.forEach(button => {
-            button.addEventListener('click', function() {
-                userInput.value = this.textContent;
-                sendMessage();
-            });
-        });
-
         // ========== FUNGSI LAINNYA (DARK MODE, NAVIGATION, DLL) ==========
         
         // Dark Mode Toggle
@@ -2321,6 +2138,7 @@
                 observer.observe(card);
             });
         });
+
     </script>
     
 </body>
