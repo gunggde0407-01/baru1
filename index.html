@@ -6,6 +6,7 @@
     <title>Asistenku - Platform Kesehatan Digital Indonesia</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet">
     <style>
         /* ===== VARIABLES & RESET ===== */
         :root {
@@ -897,91 +898,6 @@
             transform: rotate(15deg);
         }
 
-        /* ===== I-DOC SECTION ===== */
-        .idoc {
-            background-color: var(--card-bg);
-        }
-
-        .idoc-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
-        }
-
-        /* Gaya untuk widget Denser AI */
-        .idoc-chat {
-            background-color: var(--light-bg);
-            border-radius: var(--radius);
-            padding: 20px;
-            height: 500px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--input-border);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .chat-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            margin-right: 10px;
-        }
-
-        /* Gaya untuk iframe Denser AI */
-        .denser-chat-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: var(--radius);
-            background-color: var(--card-bg);
-        }
-
-        .idoc-features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .idoc-feature {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background-color: var(--light-bg);
-            border-radius: var(--radius);
-            transition: all 0.3s ease;
-        }
-
-        .idoc-feature:hover {
-            transform: translateX(5px);
-            background: var(--gradient);
-            color: white;
-        }
-
-        .idoc-feature:hover i {
-            color: white;
-        }
-
-        .idoc-feature i {
-            margin-right: 10px;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-
         /* ===== HEALTHCARE FINDER SECTION ===== */
         .healthcare-finder {
             background: linear-gradient(135deg, var(--light-gray) 0%, var(--light-bg) 100%);
@@ -1372,25 +1288,8 @@
             font-size: 0.9rem;
         }
 
-        /* ===== TYPING INDICATOR ===== */
-        .message.typing {
-            font-style: italic;
-            color: var(--gray);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
-
         /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 992px) {
-            .idoc-container {
-                grid-template-columns: 1fr;
-            }
-            
             .finder-container {
                 grid-template-columns: 1fr;
             }
@@ -1431,10 +1330,6 @@
             }
             
             .dev-form {
-                grid-template-columns: 1fr;
-            }
-            
-            .idoc-features {
                 grid-template-columns: 1fr;
             }
         }
@@ -1518,7 +1413,6 @@
         <ul class="nav-links" id="navLinks">
             <li><a href="#" class="active">Beranda</a></li>
             <li><a href="#education">Pembelajaran</a></li>
-            <li><a href="#idoc">i-Doc</a></li>
             <li><a href="#healthcare">Layanan Kesehatan</a></li>
             <li><a href="#calculators">Kalkulator</a></li>
             <li><a href="#child-dev">Perkembangan Anak</a></li>
@@ -1534,8 +1428,8 @@
                 <p class="fade-in-up">Platform kesehatan digital terpercaya yang menggabungkan edukasi, diagnosa AI, dan akses ke layanan kesehatan terdekat untuk masyarakat Indonesia.</p>
                 
                 <div class="hero-buttons fade-in-up">
-                    <a href="#idoc" class="btn btn-primary">Konsultasi Sekarang</a>
-                    <a href="#education" class="btn btn-outline">Pelajari Kesehatan</a>
+                    <a href="#education" class="btn btn-primary">Pelajari Kesehatan</a>
+                    <a href="#calculators" class="btn btn-outline">Cek Kesehatan</a>
                 </div>
             </div>
             
@@ -1643,65 +1537,6 @@
                 <div class="card material-card slide-in-right">
                     <h4><i class="fas fa-apple-alt material-icon"></i> Gizi Seimbang</h4>
                     <p>Ketahui pola makan sehat untuk menjaga kesehatan tubuh.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- i-Doc Section -->
-    <section id="idoc" class="section idoc">
-        <div class="container">
-            <h2 class="section-title">i-Doc AI Assistant</h2>
-            <p class="section-subtitle">Konsultasi kesehatan awal dengan asisten AI kami untuk mendapatkan informasi dan rekomendasi</p>
-            
-            <div class="idoc-container">
-                <div class="idoc-chat">
-                    <div class="chat-header">
-                        <div class="chat-avatar">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0;">i-Doc Assistant</h4>
-                            <p style="margin: 0; font-size: 0.8rem; color: var(--gray);">Online</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Widget Denser AI -->
-                    <iframe
-                        class="denser-chat-iframe"
-                        src="https://denser.ai/u/embed/chatbot_yaop8d5kqthdcg0cxkvh4">
-                    </iframe>
-                </div>
-                
-                <div>
-                    <h3 style="margin-bottom: 20px;">Fitur Unggulan i-Doc</h3>
-                    <div class="idoc-features">
-                        <div class="idoc-feature">
-                            <i class="fas fa-diagnoses"></i>
-                            <div>Diagnosis Awal</div>
-                        </div>
-                        <div class="idoc-feature">
-                            <i class="fas fa-pills"></i>
-                            <div>Informasi Obat</div>
-                        </div>
-                        <div class="idoc-feature">
-                            <i class="fas fa-procedures"></i>
-                            <div>Rekomendasi Tindakan</div>
-                        </div>
-                        <div class="idoc-feature">
-                            <i class="fas fa-notes-medical"></i>
-                            <div>Artikel Terkait</div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 30px;">
-                        <h4>Contoh Pertanyaan</h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
-                            <button class="btn btn-outline example-question">Apa gejala flu?</button>
-                            <button class="btn btn-outline example-question">Cara menurunkan demam?</button>
-                            <button class="btn btn-outline example-question">Makanan untuk hipertensi</button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2002,7 +1837,6 @@
                     <h3>Layanan</h3>
                     <ul class="footer-links">
                         <li><a href="#education">Edukasi Kesehatan</a></li>
-                        <li><a href="#idoc">i-Doc AI Assistant</a></li>
                         <li><a href="#healthcare">Temukan Layanan Kesehatan</a></li>
                         <li><a href="#calculators">Kalkulator Kesehatan</a></li>
                         <li><a href="#child-dev">Perkembangan Anak</a></li>
@@ -2101,7 +1935,407 @@
             navOverlay.classList.remove('active');
         }
 
-        // Event Listeners
+        // ========== FUNGSI KALKULATOR ==========
+        const calculatorPopup = document.getElementById('calculatorPopup');
+        const popupContent = document.getElementById('popupContent');
+        const popupTitle = document.getElementById('popupTitle');
+        const calculatorForm = document.getElementById('calculatorForm');
+        const calculatorResult = document.getElementById('calculatorResult');
+        const popupClose = document.getElementById('popupClose');
+        const resetCalculator = document.getElementById('resetCalculator');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const calculatorBtns = document.querySelectorAll('.calculator-btn');
+
+        let currentCalculator = '';
+
+        // Fungsi untuk membuka popup kalkulator
+        function openCalculator(calculatorType) {
+            currentCalculator = calculatorType;
+            calculatorResult.classList.remove('active');
+            
+            // Set judul popup
+            switch(calculatorType) {
+                case 'bmi':
+                    popupTitle.textContent = 'Kalkulator BMI';
+                    break;
+                case 'heart':
+                    popupTitle.textContent = 'Kalkulator Denyut Jantung';
+                    break;
+                case 'calorie':
+                    popupTitle.textContent = 'Kalkulator Kalori';
+                    break;
+                case 'water':
+                    popupTitle.textContent = 'Kalkulator Kebutuhan Cairan';
+                    break;
+                case 'calorie-burn':
+                    popupTitle.textContent = 'Kalkulator Pembakaran Kalori';
+                    break;
+                case 'pregnancy':
+                    popupTitle.textContent = 'Kalkulator Kehamilan';
+                    break;
+            }
+            
+            // Set form berdasarkan jenis kalkulator
+            setCalculatorForm(calculatorType);
+            
+            // Tampilkan popup
+            calculatorPopup.classList.add('active');
+            popupContent.classList.add('active');
+        }
+
+        // Fungsi untuk menutup popup kalkulator
+        function closeCalculatorPopup() {
+            calculatorPopup.classList.remove('active');
+            popupContent.classList.remove('active');
+        }
+
+        // Fungsi untuk mengatur form kalkulator
+        function setCalculatorForm(calculatorType) {
+            let formHTML = '';
+            
+            switch(calculatorType) {
+                case 'bmi':
+                    formHTML = `
+                        <div class="form-group">
+                            <label for="weight">Berat Badan (kg)</label>
+                            <input type="number" id="weight" placeholder="Masukkan berat badan" min="1" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="height">Tinggi Badan (cm)</label>
+                            <input type="number" id="height" placeholder="Masukkan tinggi badan" min="50" max="250">
+                        </div>
+                    `;
+                    break;
+                case 'heart':
+                    formHTML = `
+                        <div class="form-group">
+                            <label for="age">Usia (tahun)</label>
+                            <input type="number" id="age" placeholder="Masukkan usia" min="1" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label for="restingHeartRate">Denyut Jantung Istirahat (bpm)</label>
+                            <input type="number" id="restingHeartRate" placeholder="Masukkan denyut jantung istirahat" min="30" max="120">
+                        </div>
+                    `;
+                    break;
+                case 'calorie':
+                    formHTML = `
+                        <div class="form-group">
+                            <label for="calorieAge">Usia (tahun)</label>
+                            <input type="number" id="calorieAge" placeholder="Masukkan usia" min="1" max="120">
+                        </div>
+                        <div class="form-group">
+                            <label for="calorieWeight">Berat Badan (kg)</label>
+                            <input type="number" id="calorieWeight" placeholder="Masukkan berat badan" min="1" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="calorieHeight">Tinggi Badan (cm)</label>
+                            <input type="number" id="calorieHeight" placeholder="Masukkan tinggi badan" min="50" max="250">
+                        </div>
+                        <div class="form-group">
+                            <label for="activityLevel">Tingkat Aktivitas</label>
+                            <select id="activityLevel">
+                                <option value="1.2">Sedentary (sedikit atau tidak berolahraga)</option>
+                                <option value="1.375">Ringan (olahraga ringan 1-3 hari/minggu)</option>
+                                <option value="1.55">Sedang (olahraga sedang 3-5 hari/minggu)</option>
+                                <option value="1.725">Aktif (olahraga berat 6-7 hari/minggu)</option>
+                                <option value="1.9">Sangat Aktif (olahraga sangat berat & pekerjaan fisik)</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                case 'water':
+                    formHTML = `
+                        <div class="form-group">
+                            <label for="waterWeight">Berat Badan (kg)</label>
+                            <input type="number" id="waterWeight" placeholder="Masukkan berat badan" min="1" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="waterActivity">Tingkat Aktivitas</label>
+                            <select id="waterActivity">
+                                <option value="30">Sedentary (sedikit aktivitas)</option>
+                                <option value="35">Ringan (aktivitas ringan)</option>
+                                <option value="40">Sedang (aktivitas sedang)</option>
+                                <option value="45">Tinggi (aktivitas tinggi)</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                case 'calorie-burn':
+                    formHTML = `
+                        <div class="form-group">
+                            <label for="activityType">Jenis Aktivitas</label>
+                            <select id="activityType">
+                                <option value="7">Berjalan (5 km/jam)</option>
+                                <option value="8">Jogging (8 km/jam)</option>
+                                <option value="10">Lari (10 km/jam)</option>
+                                <option value="5">Bersepeda (sedang)</option>
+                                <option value="8">Berenang (sedang)</option>
+                                <option value="3">Yoga</option>
+                                <option value="6">Aerobik</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="duration">Durasi (menit)</label>
+                            <input type="number" id="duration" placeholder="Masukkan durasi aktivitas" min="1" max="300">
+                        </div>
+                        <div class="form-group">
+                            <label for="burnWeight">Berat Badan (kg)</label>
+                            <input type="number" id="burnWeight" placeholder="Masukkan berat badan" min="1" max="300">
+                        </div>
+                    `;
+                    break;
+                case 'pregnancy':
+                    formHTML = `
+                        <div class="form-group">
+                            <label for="lastPeriod">Hari Pertama Haid Terakhir</label>
+                            <input type="date" id="lastPeriod">
+                        </div>
+                        <div class="form-group">
+                            <label for="cycleLength">Panjang Siklus Haid (hari)</label>
+                            <input type="number" id="cycleLength" placeholder="Biasanya 28 hari" min="21" max="35" value="28">
+                        </div>
+                    `;
+                    break;
+            }
+            
+            calculatorForm.innerHTML = formHTML;
+        }
+
+        // Fungsi untuk menghitung berdasarkan jenis kalkulator
+        function calculate() {
+            let resultHTML = '';
+            
+            switch(currentCalculator) {
+                case 'bmi':
+                    const weight = parseFloat(document.getElementById('weight').value);
+                    const height = parseFloat(document.getElementById('height').value) / 100; // Convert to meters
+                    
+                    if (weight && height) {
+                        const bmi = weight / (height * height);
+                        let category = '';
+                        let categoryClass = '';
+                        
+                        if (bmi < 18.5) {
+                            category = 'Underweight (Kekurangan berat badan)';
+                            categoryClass = 'result-underweight';
+                        } else if (bmi < 25) {
+                            category = 'Normal (Berat badan ideal)';
+                            categoryClass = 'result-normal';
+                        } else if (bmi < 30) {
+                            category = 'Overweight (Kelebihan berat badan)';
+                            categoryClass = 'result-overweight';
+                        } else {
+                            category = 'Obese (Obesitas)';
+                            categoryClass = 'result-obese';
+                        }
+                        
+                        resultHTML = `
+                            <h4>Hasil Perhitungan BMI:</h4>
+                            <div class="result-value">${bmi.toFixed(1)}</div>
+                            <div class="result-category ${categoryClass}">${category}</div>
+                            <p style="margin-top: 15px;">BMI (Body Mass Index) adalah indikator sederhana dari korespondensi antara berat dan tinggi badan.</p>
+                        `;
+                    } else {
+                        resultHTML = '<p style="color: var(--error);">Harap masukkan berat dan tinggi badan yang valid.</p>';
+                    }
+                    break;
+                    
+                case 'heart':
+                    const age = parseInt(document.getElementById('age').value);
+                    const restingHeartRate = parseInt(document.getElementById('restingHeartRate').value);
+                    
+                    if (age && restingHeartRate) {
+                        const maxHeartRate = 220 - age;
+                        const targetHeartRateMin = Math.round((maxHeartRate - restingHeartRate) * 0.5 + restingHeartRate);
+                        const targetHeartRateMax = Math.round((maxHeartRate - restingHeartRate) * 0.85 + restingHeartRate);
+                        
+                        resultHTML = `
+                            <h4>Hasil Perhitungan Denyut Jantung:</h4>
+                            <p><strong>Denyut Jantung Maksimal:</strong> ${maxHeartRate} bpm</p>
+                            <p><strong>Zona Latihan Target:</strong> ${targetHeartRateMin} - ${targetHeartRateMax} bpm</p>
+                            <p style="margin-top: 15px;">Zona latihan target adalah rentang denyut jantung yang ideal untuk latihan kardio.</p>
+                        `;
+                    } else {
+                        resultHTML = '<p style="color: var(--error);">Harap masukkan usia dan denyut jantung istirahat yang valid.</p>';
+                    }
+                    break;
+                    
+                case 'calorie':
+                    const calorieAge = parseInt(document.getElementById('calorieAge').value);
+                    const calorieWeight = parseFloat(document.getElementById('calorieWeight').value);
+                    const calorieHeight = parseFloat(document.getElementById('calorieHeight').value);
+                    const activityLevel = parseFloat(document.getElementById('activityLevel').value);
+                    
+                    if (calorieAge && calorieWeight && calorieHeight) {
+                        // Mifflin-St Jeor Equation
+                        const bmr = 10 * calorieWeight + 6.25 * calorieHeight - 5 * calorieAge + 5;
+                        const tdee = Math.round(bmr * activityLevel);
+                        
+                        resultHTML = `
+                            <h4>Hasil Perhitungan Kebutuhan Kalori:</h4>
+                            <p><strong>BMR (Basal Metabolic Rate):</strong> ${Math.round(bmr)} kalori/hari</p>
+                            <p><strong>TDEE (Total Daily Energy Expenditure):</strong> ${tdee} kalori/hari</p>
+                            <p style="margin-top: 15px;">BMR adalah jumlah kalori yang dibutuhkan tubuh untuk fungsi dasar, sedangkan TDEE termasuk aktivitas fisik.</p>
+                        `;
+                    } else {
+                        resultHTML = '<p style="color: var(--error);">Harap masukkan semua data yang diperlukan.</p>';
+                    }
+                    break;
+                    
+                case 'water':
+                    const waterWeight = parseFloat(document.getElementById('waterWeight').value);
+                    const waterActivity = parseInt(document.getElementById('waterActivity').value);
+                    
+                    if (waterWeight) {
+                        const waterNeeded = Math.round(waterWeight * waterActivity / 1000);
+                        
+                        resultHTML = `
+                            <h4>Hasil Perhitungan Kebutuhan Cairan:</h4>
+                            <div class="result-value">${waterNeeded} Liter/hari</div>
+                            <p style="margin-top: 15px;">Kebutuhan cairan dapat bervariasi tergantung kondisi kesehatan, cuaca, dan aktivitas fisik.</p>
+                        `;
+                    } else {
+                        resultHTML = '<p style="color: var(--error);">Harap masukkan berat badan yang valid.</p>';
+                    }
+                    break;
+                    
+                case 'calorie-burn':
+                    const activityType = parseInt(document.getElementById('activityType').value);
+                    const duration = parseInt(document.getElementById('duration').value);
+                    const burnWeight = parseFloat(document.getElementById('burnWeight').value);
+                    
+                    if (activityType && duration && burnWeight) {
+                        const caloriesBurned = Math.round(activityType * burnWeight * duration / 60);
+                        
+                        resultHTML = `
+                            <h4>Hasil Perhitungan Pembakaran Kalori:</h4>
+                            <div class="result-value">${caloriesBurned} kalori</div>
+                            <p style="margin-top: 15px;">Perhitungan ini adalah estimasi dan dapat bervariasi tergantung intensitas dan kondisi individu.</p>
+                        `;
+                    } else {
+                        resultHTML = '<p style="color: var(--error);">Harap masukkan semua data yang diperlukan.</p>';
+                    }
+                    break;
+                    
+                case 'pregnancy':
+                    const lastPeriod = new Date(document.getElementById('lastPeriod').value);
+                    const cycleLength = parseInt(document.getElementById('cycleLength').value);
+                    
+                    if (lastPeriod && cycleLength) {
+                        const dueDate = new Date(lastPeriod);
+                        dueDate.setDate(dueDate.getDate() + 280 - (cycleLength - 28));
+                        
+                        const today = new Date();
+                        const weeksPregnant = Math.floor((today - lastPeriod) / (7 * 24 * 60 * 60 * 1000));
+                        
+                        resultHTML = `
+                            <h4>Hasil Perhitungan Kehamilan:</h4>
+                            <p><strong>Perkiraan Tanggal Persalinan:</strong> ${dueDate.toLocaleDateString('id-ID')}</p>
+                            <p><strong>Minggu Kehamilan Saat Ini:</strong> ${weeksPregnant} minggu</p>
+                            <p><strong>Trimester:</strong> ${weeksPregnant < 13 ? 'Pertama' : weeksPregnant < 27 ? 'Kedua' : 'Ketiga'}</p>
+                            <p style="margin-top: 15px;">Perhitungan ini berdasarkan siklus haid rata-rata. Konsultasikan dengan dokter untuk perhitungan yang lebih akurat.</p>
+                        `;
+                    } else {
+                        resultHTML = '<p style="color: var(--error);">Harap masukkan tanggal haid terakhir yang valid.</p>';
+                    }
+                    break;
+            }
+            
+            calculatorResult.innerHTML = resultHTML;
+            calculatorResult.classList.add('active');
+        }
+
+        // ========== FUNGSI PERKEMBANGAN ANAK ==========
+        const checkDevBtn = document.getElementById('checkDev');
+        const devResult = document.getElementById('devResult');
+        const milestoneList = document.getElementById('milestoneList');
+
+        // Fungsi untuk mengecek perkembangan anak
+        function checkDevelopment() {
+            const childAge = parseInt(document.getElementById('childAge').value);
+            const childGender = document.getElementById('childGender').value;
+            
+            if (!childAge || childAge < 0 || childAge > 72) {
+                alert('Harap masukkan usia anak yang valid (0-72 bulan)');
+                return;
+            }
+            
+            // Data milestone berdasarkan usia
+            const milestones = getMilestonesByAge(childAge, childGender);
+            
+            // Tampilkan hasil
+            let milestoneHTML = '';
+            milestones.forEach(milestone => {
+                milestoneHTML += `
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        ${milestone}
+                    </li>
+                `;
+            });
+            
+            milestoneList.innerHTML = milestoneHTML;
+            devResult.classList.add('active');
+        }
+
+        // Fungsi untuk mendapatkan milestone berdasarkan usia
+        function getMilestonesByAge(age, gender) {
+            const milestones = [];
+            
+            if (age <= 3) {
+                milestones.push('Mengangkat kepala saat tengkurap');
+                milestones.push('Mengikuti objek dengan mata');
+                milestones.push('Merespons suara');
+            } else if (age <= 6) {
+                milestones.push('Berguling dari posisi tengkurap ke terlentang');
+                milestones.push('Menggapai dan memegang mainan');
+                milestones.push('Tersenyum dan tertawa');
+            } else if (age <= 9) {
+                milestones.push('Duduk tanpa bantuan');
+                milestones.push('Merangkak atau bergerak dengan perut');
+                milestones.push('Mengucapkan "mama" atau "papa"');
+            } else if (age <= 12) {
+                milestones.push('Berdiri dengan berpegangan');
+                milestones.push('Mengucapkan beberapa kata sederhana');
+                milestones.push('Memahami perintah sederhana');
+            } else if (age <= 18) {
+                milestones.push('Berjalan tanpa bantuan');
+                milestones.push('Mengucapkan 10-20 kata');
+                milestones.push('Menunjuk bagian tubuh');
+            } else if (age <= 24) {
+                milestones.push('Mengucapkan kalimat 2-3 kata');
+                milestones.push('Menyusun balok');
+                milestones.push('Mengikuti instruksi 2 langkah');
+            } else if (age <= 36) {
+                milestones.push('Mengucapkan kalimat 3-4 kata');
+                milestones.push('Menggunakan toilet dengan bantuan');
+                milestones.push('Bermain dengan anak lain');
+            } else if (age <= 48) {
+                milestones.push('Mengucapkan kalimat lengkap');
+                milestones.push('Menggambar bentuk sederhana');
+                milestones.push('Memahami konsep jumlah');
+            } else if (age <= 60) {
+                milestones.push('Mengucapkan kalimat kompleks');
+                milestones.push('Mengenali huruf dan angka');
+                milestones.push('Bermain dengan aturan sederhana');
+            } else {
+                milestones.push('Membaca kata-kata sederhana');
+                milestones.push('Menulis nama sendiri');
+                milestones.push('Memahami konsep waktu');
+            }
+            
+            // Tambahkan milestone khusus berdasarkan gender
+            if (gender === 'male' && age > 24) {
+                milestones.push('Koordinasi motorik kasar berkembang dengan baik');
+            } else if (gender === 'female' && age > 24) {
+                milestones.push('Keterampilan bahasa dan sosial berkembang dengan baik');
+            }
+            
+            return milestones;
+        }
+
+        // ========== EVENT LISTENERS ==========
         document.addEventListener('DOMContentLoaded', function() {
             setupDarkMode();
             
@@ -2137,9 +2371,61 @@
                 card.style.transition = "opacity 0.6s ease, transform 0.6s ease";
                 observer.observe(card);
             });
-        });
 
+            // Kalkulator
+            calculatorBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const calculatorType = this.getAttribute('data-calculator');
+                    openCalculator(calculatorType);
+                });
+            });
+
+            popupClose.addEventListener('click', closeCalculatorPopup);
+            resetCalculator.addEventListener('click', function() {
+                calculatorForm.reset();
+                calculatorResult.classList.remove('active');
+            });
+            calculateBtn.addEventListener('click', calculate);
+
+            // Perkembangan Anak
+            checkDevBtn.addEventListener('click', checkDevelopment);
+        });
     </script>
-    
+
+    <!-- Chatbot Script -->
+    <script type="module">
+        import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+        createChat({
+            webhookUrl: 'https://agung121.app.n8n.cloud/webhook/b4fc0e28-60e3-4a1b-94f6-5f8328d04de2/chat',
+            webhookConfig: {
+                method: 'POST',
+                headers: {}
+            },
+            target: 'body',
+            mode: 'window',
+            chatInputKey: 'chatInput',
+            chatSessionKey: 'sessionId',
+            loadPreviousSession: true,
+            metadata: {},
+            showWelcomeScreen: false,
+            defaultLanguage: 'en',
+            initialMessages: [
+                'Hi Sobat!',
+                'Halo! Saya i-Doc, asisten kesehatan AI Anda. Ada yang bisa saya bantu hari ini?'
+            ],
+            i18n: {
+                en: {
+                    title: 'I-doc',
+                    subtitle: 'Mulai berbincang dengan asistenmu!',
+                    footer: '',
+                    getStarted: 'New Conversation',
+                    inputPlaceholder: 'Ketik pertanyaanmu di sini...',
+                },
+            },
+            enableStreaming: false,
+        });
+    </script>
 </body>
 </html>
